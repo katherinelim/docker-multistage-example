@@ -1,0 +1,8 @@
+#! /bin/bash -e
+#
+# Run dev environment
+
+cd $(dirname $0)/..
+
+docker-compose build
+docker-compose run --rm dev bash

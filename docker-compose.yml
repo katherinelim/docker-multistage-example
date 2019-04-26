@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  dev:
+    image: openjdk:9-jdk-slim
+    command: bash
+    volumes:
+      - .:/work
+    working_dir: /work
