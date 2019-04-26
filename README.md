@@ -78,3 +78,24 @@ For the purpose of this example the `cacert` was assigned an alias name of `mult
 Using the alias we can use the `keytool` command to output the SHA-256 fingerprint of the certificate.
 The script then prints the SHA-256 fingerprint of the `cacert` used in the build image for manual verification.
 This step could be improved by modifying the script to compare the SHA-256 fingerprints.
+
+Output:
+
+```BASH
+$ auto/test
+
+***** Press Enter at the password prompt *****
+Enter keystore password:  
+
+*****************  WARNING WARNING WARNING  *****************
+* The integrity of the information stored in your keystore  *
+* has NOT been verified!  In order to verify its integrity, *
+* you must provide your keystore password.                  *
+*****************  WARNING WARNING WARNING  *****************
+
+multistage, Apr 26, 2019, trustedCertEntry, 
+Certificate fingerprint (SHA-256): 0C:25:8A:12:A5:67:4A:EF:25:F2:8B:A7:DC:FA:EC:EE:A3:48:E5:41:E6:F5:CC:4E:E6:3B:71:B3:61:60:6A:C3
+
+***** It must match this fingerprint for the alias "multistage" *****
+Certificate fingerprint (SHA-256): 0C:25:8A:12:A5:67:4A:EF:25:F2:8B:A7:DC:FA:EC:EE:A3:48:E5:41:E6:F5:CC:4E:E6:3B:71:B3:61:60:6A:C3
+```
