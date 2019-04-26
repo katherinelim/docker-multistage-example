@@ -1,4 +1,4 @@
-# Docker Multi-stage build example
+# Docker Multi-stage Build Example
 
 Docker-multistage-example demonstrates how a Dockerfile can be converted into a multi-stage build.
 
