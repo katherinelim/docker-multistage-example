@@ -27,7 +27,7 @@ WORKDIR /home/java
 
 ## Multi-stage Build Dockerfile
 
-The production image is `java-multistage:latest` and can be build with the script `auto/package`.
+The production image is `java-multistage:latest` and can be built with the script `auto/package`.
 
 The multi-stage build Dockerfile looks like this:
 
