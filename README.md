@@ -35,8 +35,7 @@ The multi-stage build Dockerfile looks like this:
 FROM openjdk:9-jdk-slim AS build
 COPY certificates /usr/local/share/ca-certificates/certificates
 RUN apt-get update && apt-get install --no-install-recommends -y -qq ca-certificates-java && \
-  update-ca-certificates --verbose && \
-  keytool -noprompt -cacerts -storepass changeit -importcert -alias multistage -file /usr/local/share/ca-certificates/certificates
+  update-ca-certificates --verbose
 
 FROM openjdk:9-jre-slim
 COPY --from=build /etc/ssl/certs/java/cacerts /etc/ssl/certs/java/cacerts
@@ -44,11 +43,11 @@ RUN groupadd --gid 1000 java && \
   useradd --uid 1000 --gid java --shell /bin/bash --create-home java && \
   chmod -R a+w /home/java
 WORKDIR /home/java
+USER java
 ```
 
-The certificate was copied to the file `certificates`.
-The `update-ca-certificates` command didn't add it to the truststore.
-Using the `keytool` command the certificate was added with the alias `multistage` for later testing.
+The certificate was copied to the folder `certificates` for the
+`update-ca-certificates` command to add it to the truststore.
 
 ## Dockerfile Optimising
 
@@ -61,9 +60,9 @@ In terms of size `openjdk:9-jdk-slim` is 374MB and `openjdk:9-jre-slim` is 286MB
 
 The original Dockerfile already has some optimisations, i.e., combining commands into one `RUN` instruction.
 By not using separate `RUN` instructions for each command minimises the number of image layers created.
-We've optimised adding the `keytool` command to the `build` image and moved the `java` user creation to the production image.
+We've optimised by moving the `java` user creation to the production image.
 The updated `cacerts` file from the build image is copied from the build image to the production image.
-We've added an additional `cacert` to the truststore in the build image as this file is not needed in the production image.
+An additional certificate - `ca.crt` - was added to the truststore in the build image as this file is not needed in the production image.
 
 The size and complexity of the production image could be reduced by choosing a smaller base image, like one based
 on Alpine Linux.
@@ -72,9 +71,9 @@ when vulnerabilities are found.
 
 ## Testing the Java Truststore
 
-To test that the Java truststore is in the production image an it contains the added `cacert`, a test script was written. Run `auto/test` to execute the test script.
+To test that the Java truststore is in the production image an it contains the added `ca.crt`, a test script was written. Run `auto/test` to execute the test script.
 
-For the purpose of this example the `cacert` was assigned an alias name of `multistage`.
+For the purpose of this example the added certificate has an alias name of `debian:ca.pem`.
 Using the alias we can use the `keytool` command to output the SHA-256 fingerprint of the certificate.
 The script then prints the SHA-256 fingerprint of the `cacert` used in the build image for manual verification.
 This step could be improved by modifying the script to compare the SHA-256 fingerprints.
@@ -93,9 +92,9 @@ Enter keystore password:
 * you must provide your keystore password.                  *
 *****************  WARNING WARNING WARNING  *****************
 
-multistage, Apr 26, 2019, trustedCertEntry, 
+debian:ca.pem, Apr 28, 2019, trustedCertEntry, 
 Certificate fingerprint (SHA-256): 0C:25:8A:12:A5:67:4A:EF:25:F2:8B:A7:DC:FA:EC:EE:A3:48:E5:41:E6:F5:CC:4E:E6:3B:71:B3:61:60:6A:C3
 
-***** It must match this fingerprint for the alias "multistage" *****
+***** It must match this fingerprint for the alias "debian:ca.pem" *****
 Certificate fingerprint (SHA-256): 0C:25:8A:12:A5:67:4A:EF:25:F2:8B:A7:DC:FA:EC:EE:A3:48:E5:41:E6:F5:CC:4E:E6:3B:71:B3:61:60:6A:C3
 ```
