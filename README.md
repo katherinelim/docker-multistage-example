@@ -71,7 +71,7 @@ when vulnerabilities are found.
 
 ## Testing the Java Truststore
 
-To test that the Java truststore is in the production image an it contains the added `ca.crt`, a test script was written. Run `auto/test` to execute the test script.
+To test that the Java truststore is in the production image and it contains the added `ca.crt`, a test script was written. Run `auto/test` to execute the test script.
 
 For the purpose of this example the added certificate has an alias name of `debian:ca.pem`.
 Using the alias we can use the `keytool` command to output the SHA-256 fingerprint of the certificate.
