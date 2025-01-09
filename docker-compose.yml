@@ -1,8 +1,6 @@
-version: '3'
-
 services:
   dev:
-    image: openjdk:9-jdk-slim
+    image: eclipse-temurin:21-jdk
     command: bash
     volumes:
       - .:/work

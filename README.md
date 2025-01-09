@@ -5,6 +5,7 @@ Docker-multistage-example demonstrates how a Dockerfile can be converted into a 
 Multi-stage builds are useful to anyone who needs to optimise Dockerfiles while keeping them easy to read and maintain.
 
 This example will:
+
 * convert `Dockerfile-orig` to a multi-stage Dockerfile
 * optimise the Dockerfile for caching benefits
 * import a cacert
@@ -15,12 +16,12 @@ This example will:
 The initial Dockerfile looks like this:
 
 ```Dockerfile
-FROM openjdk:9-jdk-slim
+FROM eclipse-temurin:21-jdk
 COPY certificates /usr/local/share/ca-certificates/certificates
 RUN apt-get update && apt-get install --no-install-recommends -y -qq ca-certificates-java && \
          update-ca-certificates
-RUN groupadd --gid 1000 java &&\
-    useradd --uid 1000 --gid java --shell /bin/bash --create-home java && \
+RUN groupadd --gid 1001 java &&\
+    useradd --uid 1001 --gid java --shell /bin/bash --create-home java && \
     chmod -R a+w /home/java
 WORKDIR /home/java
 ```
@@ -32,15 +33,15 @@ The production image is `java-multistage:latest` and can be built with the scrip
 The multi-stage build Dockerfile looks like this:
 
 ```Dockerfile
-FROM openjdk:9-jdk-slim AS build
+FROM eclipse-temurin:21-jdk AS build
 COPY certificates /usr/local/share/ca-certificates/certificates
 RUN apt-get update && apt-get install --no-install-recommends -y -qq ca-certificates-java && \
   update-ca-certificates --verbose
 
-FROM openjdk:9-jre-slim
+FROM eclipse-temurin:21-jre
 COPY --from=build /etc/ssl/certs/java/cacerts /etc/ssl/certs/java/cacerts
-RUN groupadd --gid 1000 java && \
-  useradd --uid 1000 --gid java --shell /bin/bash --create-home java && \
+RUN groupadd --gid 1001 java && \
+  useradd --uid 1001 --gid java --shell /bin/bash --create-home java && \
   chmod -R a+w /home/java
 WORKDIR /home/java
 USER java
@@ -52,11 +53,11 @@ The certificate was copied to the folder `certificates` for the
 ## Dockerfile Optimising
 
 There are now multiple `FROM` statements in the Dockerfile. Each uses a different base.
-The first uses `openjdk:9-jdk-slim` and the second `FROM` instruction starts with `openjdk:9-jre-slim` as its base.
+The first uses `eclipse-temurin:21-jdk` and the second `FROM` instruction starts with `eclipse-temurin:21-jre` as its base.
 
 Instead of building the final image with the JDK, we're using the JRE image because we don't need the JDK in the production image. If this example included an application it would have been built using the JDK base image.
 The JRE image is sufficient to run the application with a significant reduction in image size.
-In terms of size `openjdk:9-jdk-slim` is 374MB and `openjdk:9-jre-slim` is 286MB.
+In terms of size `eclipse-temurin:21-jdk` is 478MB and `eclipse-temurin:21-jre` is 311MB.
 
 The original Dockerfile already has some optimisations, i.e., combining commands into one `RUN` instruction.
 By not using separate `RUN` instructions for each command minimises the number of image layers created.
@@ -92,7 +93,7 @@ Enter keystore password:
 * you must provide your keystore password.                  *
 *****************  WARNING WARNING WARNING  *****************
 
-debian:ca.pem, Apr 28, 2019, trustedCertEntry, 
+debian:ca.pem, Jan 9, 2025, trustedCertEntry, 
 Certificate fingerprint (SHA-256): 0C:25:8A:12:A5:67:4A:EF:25:F2:8B:A7:DC:FA:EC:EE:A3:48:E5:41:E6:F5:CC:4E:E6:3B:71:B3:61:60:6A:C3
 
 ***** It must match this fingerprint for the alias "debian:ca.pem" *****
